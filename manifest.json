@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "locale": "en_US.UTF-8",
+  "metadata": {
+    "appmode": "python-shiny",
+    "entrypoint": "app"
+  },
+  "python": {
+    "version": "3.12.0",
+    "package_manager": {
+      "name": "pip",
+      "version": "23.3.1",
+      "package_file": "requirements.txt"
+    }
+  },
+  "files": {
+    "requirements.txt": {
+      "checksum": "cdbb0967e560946bf86f343e44e2b036"
+    },
+    ".DS_Store": {
+      "checksum": "f9d7d3e15414bc2d721b33d54e2398ec"
+    },
+    ".env": {
+      "checksum": "03e32ba7211fa26662c84f6085ad3682"
+    },
+    ".gitignore": {
+      "checksum": "deabb3ac015d2ecb15d7d588018f28c6"
+    },
+    "LICENSE": {
+      "checksum": "b8a3298ae8ed6a7ae3d21913bdc754cc"
+    },
+    "app.py": {
+      "checksum": "0a70afa5f89e531b03739ca670bf7bee"
+    },
+    "askalex.py": {
+      "checksum": "e5ec4c370e14a2aa6125856ba7c1293b"
+    },
+    "diagram.png": {
+      "checksum": "5fd3a8641d91145e0462b20743bc0bbd"
+    },
+    "openalex.py": {
+      "checksum": "9c3e89ded1e845c862b0eaa4a596969a"
+    },
+    "readme.md": {
+      "checksum": "58133343d14ecba14a426383f0a35061"
+    }
+  }
+}
