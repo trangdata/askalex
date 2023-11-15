@@ -10,7 +10,7 @@ Output is the OpenAI response and relevant articles.
 
 Currently, the app works with [Azure OpenAI endpoints](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference).
 
-## Setup
+## ⚙️ Setup
 
 Assuming you have `conda` installed, you first want to create a new conda environment named `askalex` and install the necessary dependencies:
 
@@ -38,19 +38,26 @@ COMPANY_PROXY
 COMPANY_NO_PROXY
 ```
 
-## Run app
+Finally, you will need to modify the `model_engine_dict` variable in [`app.py`](app.py) to match the model-engine pairs that your company has on Azure.
+
+
+## 🌿 Run app
 
 ``` sh
 # conda activate askalex
 shiny run --port 56486 --reload app.py
 ```
 
-## Roadmap
+## 🛤️ Roadmap
 
+- fix token issue for text-davinci-003
 - use `openai v1.2.3`
 - use openai endpoint
+- add community key for public use
+- incorporate full text?
+- improve OpenAlex search (currently performing abstract search)
 
-## Contributing
+## 🤝 Contributing
 
 Thank you for considering contributing!
 Please open an issue to discuss a contribution you'd like to implement to make this app better.

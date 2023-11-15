@@ -1,12 +1,4 @@
 # %%
-from shiny import App, render, ui, reactive
-from dotenv import load_dotenv
-import os
-import openai
-import pyalex
-import random
-
-# %%
 model_engine_dict = {
     "Text-Davinci-003": "text-davinci-003 (faster)",
     "GPT-4": "gpt-4",
@@ -19,6 +11,13 @@ oa_sample_questions = {
     "What are some key points about TYK2?": "TYK2",
 }
 
+# %%
+from shiny import App, render, ui, reactive
+from dotenv import load_dotenv
+import os
+import openai
+import pyalex
+import random
 from askalex import answer_question
 from openalex import find_abs, get_embed, search_docs, style_dataframe
 

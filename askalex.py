@@ -1,9 +1,7 @@
 import openai
 import os
 import numpy as np
-
 from openai.embeddings_utils import get_embedding, distances_from_embeddings
-
 
 openai.api_type = os.getenv("OPENAI_API_TYPE")
 openai.api_base = os.getenv("OPENAI_API_BASE")
@@ -11,14 +9,9 @@ openai.api_version = os.getenv("OPENAI_API_VERSION")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.proxy = os.getenv("OPENAI_PROXY")
 
-# def cosine_similarity(a, b):
-#     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-
 # def get_embedding(text, engine="text-embedding-ada-002"):  # model = "deployment_name"
 #     return client.embeddings.create(input=[text], model=engine).data[0].embedding
 #     # return openai.Embedding.create(input=text, engine=engine)["data"][0]["embedding"]
-
 
 # def cosine_similarity(a, b):
 #     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
@@ -116,20 +109,12 @@ def complete_model(
     prompt,
     engine,
     stop_sequence,
-    model_engine_dict={
-        "GPT-4-32k": "gpt-4-32k",
-        "GPT-4": "gpt-4",
-        "Text-Davinci-003": "text-davinci-003",
-    },
-    embedding_encoding="cl100k_base",
 ):
     model = [engine]
 
     if "gpt" in model:
         max_tokens = 10000
     else:
-        # encoding = tiktoken.get_encoding(embedding_encoding)
-        # n_tokens = len(encoding.encode(prompt))
         n_tokens = len(prompt) // 4
         max_tokens = 3880 - n_tokens
 
