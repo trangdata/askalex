@@ -1,20 +1,9 @@
-import openai
-import os
 import numpy as np
-from openai.embeddings_utils import get_embedding, distances_from_embeddings
+from openai_utils import get_embedding, client, estimate_cost
 
-openai.api_type = os.getenv("OPENAI_API_TYPE")
-openai.api_base = os.getenv("OPENAI_API_BASE")
-openai.api_version = os.getenv("OPENAI_API_VERSION")
-openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.proxy = os.getenv("OPENAI_PROXY")
 
-# def get_embedding(text, engine="text-embedding-ada-002"):  # model = "deployment_name"
-#     return client.embeddings.create(input=[text], model=engine).data[0].embedding
-#     # return openai.Embedding.create(input=text, engine=engine)["data"][0]["embedding"]
-
-# def cosine_similarity(a, b):
-#     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
 def create_context(question, df, max_len=1800, size="ada"):
@@ -22,20 +11,16 @@ def create_context(question, df, max_len=1800, size="ada"):
     Create a context for a question by finding the most similar context from the dataframe
     """
 
-    # Get the embeddings for the question
-    q_embeddings = get_embedding(question, engine="tcell_ada_embeddings")
-
-    # Get the distances from the embeddings
-    df["distances"] = distances_from_embeddings(
-        q_embeddings, df["embedding"].values, distance_metric="cosine"
+    q_embeddings = get_embedding(question)
+    df["similarities"] = df.embedding.apply(
+        lambda x: cosine_similarity(x, q_embeddings)
     )
-    # df["sim"] = cosine_similarity(q_embeddings, df["embedding"].values)
 
     returns = []
     cur_len = 0
 
     # Sort by distance and add the text to the context until the context is too long
-    for i, row in df.sort_values("distances", ascending=True).iterrows():
+    for i, row in df.sort_values("similarities", ascending=False).iterrows():
         # Add the length of the text to the current length
         cur_len += row["n_tokens"] + 4
 
@@ -53,7 +38,7 @@ def create_context(question, df, max_len=1800, size="ada"):
 def answer_question(
     question,
     df,
-    engine="T-Cell-Phenotype",  # "GPT-4-32k",
+    model="gpt-35-turbo",  # "GPT-4-32k",
     max_len=4097,
     size="ada",
     debug=False,
@@ -88,7 +73,38 @@ def answer_question(
 
     prompt = template.format(context=context, question=question)
     try:
-        return trim_incomplete_sentence(complete_model(prompt, engine, stop_sequence))
+        result = complete_model(prompt, model, stop_sequence)
+        return trim_incomplete_sentence(result[0]), result[1]
+    except Exception as e:
+        print(e)
+        return ""
+
+
+def get_keywords(
+    question,
+    model="gpt-4-32k",
+    stop_sequence=None,
+):
+    """
+    Get 2-3 keywords from given question.
+    """
+    if question is None:
+        return ""
+
+    template = (
+        "I would like to search the literature to find answer for the following question. "
+        + "Give me 2 to 3 keywords that I should include in my literature search. "
+        + 'List the most important keyword first and concatenate them by "+". '
+        + 'Make them concise, for example: use "ABCC1" instead of "ABCC1 gene". '
+        + "For example, for the question "
+        + '"What is the biological rationale for an association between the gene ABCC1 and cardiotoxicity?" '
+        + 'The keywords are "ABCC1+cardiotoxicity+biological rationale". '
+        + "\n\nQuestion: {question}\nAnswer: "
+    )
+
+    prompt = template.format(question=question)
+    try:
+        return complete_model(prompt, model, stop_sequence)[0]
     except Exception as e:
         print(e)
         return ""
@@ -107,39 +123,34 @@ def trim_incomplete_sentence(paragraph):
 
 def complete_model(
     prompt,
-    engine,
+    model,
     stop_sequence,
 ):
-    model = [engine]
 
-    if "gpt" in model:
-        max_tokens = 10000
+    if "gpt-4" in model:
+        max_tokens = 8000
     else:
+        # encoding = tiktoken.get_encoding(embedding_encoding)
+        # n_tokens = len(encoding.encode(prompt))
         n_tokens = len(prompt) // 4
         max_tokens = 3880 - n_tokens
 
-    if model == "gpt-4-32k" or model == "gpt-4":
-        response = openai.ChatCompletion.create(
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-            stop=stop_sequence,
-            model=model,
-            engine=engine,
-        )
-        return response["choices"][0]["message"]["content"]
+    response = client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=stop_sequence,
+        temperature=0,
+        model=model,
+    )
+
+    return response.choices[0].message.content, estimate_cost(response)
+
+
+def show_cost(amount):
+    if amount < 0.01:
+        return "< $0.01"
     else:
-        response = openai.Completion.create(
-            prompt=prompt,
-            temperature=0,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-            stop=stop_sequence,
-            engine=engine,
-        )
-        return response["choices"][0]["text"]
+        return f"${amount:.2f}"
