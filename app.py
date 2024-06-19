@@ -62,7 +62,7 @@ def nav_controls(prefix: str) -> List[NavSetArg]:
                     ),
                     ui.panel_main(
                         ui.input_switch("oa_sample", "Use an example", False),
-                        ui.output_ui("oa_question"),
+                        ui.output_ui("out_question"),
                         ui.input_action_button("oa_submit", "Submit"),
                         ui.output_text("oa_txt"),
                     ),
@@ -170,7 +170,7 @@ def server(input, output, session):
 
     @output
     @render.ui
-    def oa_question():
+    def out_question():
         if input.oa_sample():
             return ui.input_select(
                 "oa_question",
