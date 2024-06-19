@@ -23,22 +23,22 @@ pip install -r requirements.txt
 
 You will also need the following environment variables in your `.env` file:
 ```
-OPENAI_API_TYPE
+OPENAI_API_TYPE = azure
 OPENAI_API_KEY
 OPENAI_API_BASE
-OPENAI_PROXY 
-OPENAI_API_VERSION 
+OPENAI_API_VERSION = 2023-05-15
 APP_RUN = local # or connect_server
 ```
 
 and optionally:
 ```
+OPENAI_PROXY 
 OPENALEX_API_KEY 
 COMPANY_PROXY
 COMPANY_NO_PROXY
 ```
 
-Finally, you will need to modify the `model_engine_dict` variable in [`app.py`](app.py) to match the model-engine pairs that your company has on Azure.
+Finally, you may need to modify the `model_engine_dict` variable in [`app.py`](app.py) to match the your company's available models on Azure.
 
 
 ## 🌿 Run app
@@ -51,7 +51,6 @@ shiny run --port 56486 --reload app.py
 ## 🛤️ Roadmap
 
 - fix token issue for text-davinci-003
-- use `openai v1.2.3`
 - use openai endpoint
 - add community key for public use
 - incorporate full text?

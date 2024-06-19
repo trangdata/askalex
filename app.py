@@ -16,11 +16,17 @@ model_engine_dict = {
 }
 
 oa_sample_questions = [
-    "On a scale from 0—10, what score would you give the gene BRCA1 for its association with breast cancer?",
-    "What are some key points about TYK2?",
-    "How do current clinical guidelines address the use of anticoagulants in patients with atrial fibrillation?",
-    "How does the effectiveness of traditional chemotherapy compare to targeted therapies in the treatment of leukemia?",
-    "What are the key differences between the molecular mechanisms of apoptosis and necrosis?",
+    # "On a scale from 0—10, what score would you give the gene BRCA1 for its association with breast cancer?",
+    # "What are some key points about TYK2?",
+    # "How do current clinical guidelines address the use of anticoagulants in patients with atrial fibrillation?",
+    # "How does the effectiveness of traditional chemotherapy compare to targeted therapies in the treatment of leukemia?",
+    # "What are the key differences between the molecular mechanisms of apoptosis and necrosis?",
+    "How does tau malfunction in Alzheimer's?",
+    "What is BRCA2's role in breast cancer?",
+    "What is hydroxychloroquine's efficacy in rheumatoid arthritis?",
+    "How reliable is CRP as an inflammation marker?",
+    "How does the Mediterranean diet reduce heart disease risk?",
+    "What is mTOR's role in aging?",
 ]
 
 if os.getenv("APP_RUN") == "local":
@@ -29,10 +35,6 @@ if os.getenv("APP_RUN") == "local":
     os.environ["https_proxy"] = bms_proxy
     os.environ["ftp_proxy"] = bms_proxy
     os.environ["no_proxy"] = ".celgene.com,.bms.com"
-
-
-# def jss(s):
-#     return f"""$(document).on("keydown", function(e) {{if(e.keyCode == 13){{Shiny.onInputChange("{s}", Math.random());}}}});"""
 
 
 def nav_controls(prefix: str) -> List[NavSetArg]:
@@ -59,21 +61,9 @@ def nav_controls(prefix: str) -> List[NavSetArg]:
                         ui.output_text("oa_cost"),
                     ),
                     ui.panel_main(
-                        ui.row(
-                            ui.column(
-                                10,
-                                ui.input_switch("oa_sample", "Use an example", False),
-                            ),
-                            ui.column(
-                                2,
-                                ui.input_action_button(
-                                    "oa_submit",
-                                    "Submit",
-                                    style="margin-top: -6px;margin-bottom: 12px;",
-                                ),
-                            ),
-                        ),
+                        ui.input_switch("oa_sample", "Use an example", False),
                         ui.output_ui("oa_question"),
+                        ui.input_action_button("oa_submit", "Submit"),
                         ui.output_text("oa_txt"),
                     ),
                 ),
@@ -86,7 +76,7 @@ def nav_controls(prefix: str) -> List[NavSetArg]:
             ui.nav_control(
                 ui.a(
                     "Source code",
-                    href="https://biogit.pri.bms.com/let20/askalex",
+                    href="https://github.com/trangdata/askalex",
                     target="_blank",
                 ),
             ),
@@ -143,8 +133,11 @@ def server(input, output, session):
             return None
         return style_dataframe(oa_articles()).style.hide(axis="index")
 
+    result = reactive.Value()
+
+    @reactive.Effect
     @reactive.event(input.oa_submit)
-    def oa_answered():
+    def _():
         nonlocal ids
         if oa_articles() is None:
             return None
@@ -159,18 +152,21 @@ def server(input, output, session):
         if ids:
             ui.notification_remove(ids.pop())
 
-        return answer
+        result.set(answer)
 
     @output
     @render.text
     def oa_txt():
-        answer = oa_answered()[0]
-        return f"\n{answer}"
+        res = result.get()
+        if res is not None:
+            return f"\n{res[0]}"
 
     @output
     @render.text
     def oa_cost():
-        return show_cost(oa_answered()[1][0])
+        res = result.get()
+        if res is not None:
+            return show_cost(res[1][0])
 
     @output
     @render.ui
