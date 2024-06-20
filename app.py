@@ -1,7 +1,5 @@
 # %%
 from shiny import App, render, ui, reactive
-from shiny.types import NavSetArg
-from typing import List
 import os
 from askalex import answer_question, get_keywords, show_cost
 from openalex import find_abs, get_embed, search_docs, style_dataframe
@@ -22,11 +20,11 @@ oa_sample_questions = [
     # "How does the effectiveness of traditional chemotherapy compare to targeted therapies in the treatment of leukemia?",
     # "What are the key differences between the molecular mechanisms of apoptosis and necrosis?",
     "How does tau malfunction in Alzheimer's?",
-    "What is BRCA2's role in breast cancer?",
+    "How does FTO affect obesity risk?",
     "What is hydroxychloroquine's efficacy in rheumatoid arthritis?",
     "How reliable is CRP as an inflammation marker?",
     "How does the Mediterranean diet reduce heart disease risk?",
-    "What is mTOR's role in aging?",
+    "How does Epstein-Barr virus lead to lymphoma?",
 ]
 
 if os.getenv("APP_RUN") == "local":
@@ -37,57 +35,53 @@ if os.getenv("APP_RUN") == "local":
     os.environ["no_proxy"] = ".celgene.com,.bms.com"
 
 
-def nav_controls(prefix: str) -> List[NavSetArg]:
-    return [
-        ui.nav(
-            "",
-            ui.div(
-                {"style": "width:70%;margin: 0 auto"},
-                ui.layout_sidebar(
-                    ui.panel_sidebar(
-                        ui.input_select(
-                            "oa_engine",
-                            "LLM model",
-                            model_engine_dict,
-                        ),
-                        ui.input_slider(
-                            "n_articles",
-                            "Number of articles to index:",
-                            min=3,
-                            max=20,
-                            value=6,
-                        ),
-                        ui.p("Estimated cost:"),
-                        ui.output_text("oa_cost"),
-                    ),
-                    ui.panel_main(
-                        ui.input_switch("oa_sample", "Use an example", False),
-                        ui.output_ui("out_question"),
-                        ui.input_action_button("oa_submit", "Submit"),
-                        ui.output_text("oa_txt"),
-                    ),
+my_nav = [
+    ui.nav(
+        "",
+        ui.layout_sidebar(
+            ui.panel_sidebar(
+                ui.input_select(
+                    "oa_engine",
+                    "LLM model",
+                    model_engine_dict,
                 ),
-                ui.output_table("oa_articles_tab"),
+                ui.input_slider(
+                    "n_articles",
+                    "Number of articles to index:",
+                    min=3,
+                    max=20,
+                    value=6,
+                ),
+                ui.p("Estimated cost:"),
+                ui.output_text("oa_cost"),
+            ),
+            ui.panel_main(
+                ui.input_switch("oa_sample", "Use an example", False),
+                ui.output_ui("out_question"),
+                ui.input_action_button("oa_submit", "Submit"),
+                ui.output_text("oa_txt"),
             ),
         ),
-        ui.nav_spacer(),
-        ui.nav_menu(
-            "Other links",
-            ui.nav_control(
-                ui.a(
-                    "Source code",
-                    href="https://github.com/trangdata/askalex",
-                    target="_blank",
-                ),
+        ui.output_table("oa_articles_tab"),
+    ),
+    ui.nav_spacer(),
+    ui.nav_menu(
+        "🔗",
+        ui.nav_control(
+            ui.a(
+                "Source code",
+                href="https://github.com/trangdata/askalex",
+                target="_blank",
             ),
-            align="right",
         ),
-    ]
-
+        align="right",
+    ),
+]
 
 app_ui = ui.page_navbar(
-    *nav_controls("Ask a question"),
+    my_nav,
     title="🦙  AskAlex",
+    bg="#014b75",
     inverse=True,
     id="navbar_id",
 )
@@ -184,7 +178,7 @@ def server(input, output, session):
             ui.input_text(
                 "oa_question",
                 "",
-                placeholder="What are some key points about TYK2?",
+                placeholder="What is mTOR's role in aging?",
                 width="100%",
             ),
         )
