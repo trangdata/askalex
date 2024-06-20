@@ -6,9 +6,11 @@ AskAlex is a minimal Python Shiny app that integrates [OpenAI](https://platform.
 Given a scientific question from the user, AskAlex searches the OpenAlex database for 100 most relevant articles, uses semantic search to find the best 10 abstracts, and includes them in the prompt sent to OpenAI along with your original question.
 Output is the OpenAI response and relevant articles.
 
-![AskAlex-workflow](diagram.png)
+![AskAlex-workflow](images/diagram.png)
 
 Currently, the app works with [Azure OpenAI endpoints](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference).
+
+![AskAlex-demo](images/demo.gif)
 
 ## ⚙️ Setup
 
